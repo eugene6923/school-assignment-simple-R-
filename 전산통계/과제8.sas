@@ -1,0 +1,15 @@
+DATA poisson;
+n=20;
+do x=0 TO n;
+do p=0.5, 1, 2,3,4;
+IF x=0 THEN prob=Poisson(p,x);
+ELSE prob=Poisson(p,x)-Poisson(p,x-1);
+OUTPUT;
+END;
+END;
+RUN;
+PROC TABULATE DATA=poisson;
+CLASS x p;
+VAR prob;
+TABLE x,p*prob*F=6.3;
+RUN;
