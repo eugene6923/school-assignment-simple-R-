@@ -1,0 +1,33 @@
+data assignment2_1;
+do i=1 to 3000;
+x=ranpoi(0,1);
+mu=1; var=1; sd=SQRT(var);
+y=rannor(0)*sd+mu;
+output;
+end;
+run;
+proc gchart;
+vbar x/ levels=15;
+vbar y/ levels=15;
+run;
+
+data assignment2_2;
+do i=1 to 3000;
+x=ranpoi(0,10);
+mu=10; var=1; sd=SQRT(var);
+y=rannor(0)*sd+mu;
+output;
+end;
+run;
+proc gchart;
+vbar x/ levels=15;
+vbar y/ levels=15;
+run;
+
+data assignment2_3;
+do i=1 to 3000;
+x=ranpoi(0,100);
+mu=100; var=1; sd=SQRT(var);
+y=rannor(0)*sd+mu;
+output;
+end;
