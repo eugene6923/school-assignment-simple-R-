@@ -1,0 +1,181 @@
+---
+title: "금융계량 과제5"
+author: "1602108 정유진"
+date: "2018년 11월 15일"
+output: word_document
+---
+
+# 1번
+
+```{r}
+library("urca")
+```
+
+```{r}
+data=read.csv("c:\\temp\\MacroData.csv",header=TRUE)
+attach(data)
+head(data)
+```
+
+## (a)
+
+```{r}
+#AIC 낮을수록 좋은 모형
+growth.ts1<-arima(output,order=c(3,0,3),include.mean=FALSE)
+AIC(growth.ts1)
+growth.ts2<-arima(output,order=c(3,0,2),include.mean=FALSE)
+AIC(growth.ts2)
+growth.ts3<-arima(output,order=c(3,0,1),include.mean=FALSE)
+AIC(growth.ts3)
+growth.ts4<-arima(output,order=c(3,0,0),include.mean=FALSE)
+AIC(growth.ts4)
+growth.ts5<-arima(output,order=c(2,0,3),include.mean=FALSE)
+AIC(growth.ts5)
+growth.ts6<-arima(output,order=c(2,0,2),include.mean=FALSE)
+AIC(growth.ts6)
+growth.ts7<-arima(output,order=c(2,0,1),include.mean=FALSE)
+AIC(growth.ts7)
+growth.ts8<-arima(output,order=c(2,0,0),include.mean=FALSE)
+AIC(growth.ts8)
+growth.ts9<-arima(output,order=c(1,0,3),include.mean=FALSE)
+AIC(growth.ts9)
+growth.ts10<-arima(output,order=c(1,0,2),include.mean=FALSE)
+AIC(growth.ts10)
+growth.ts11<-arima(output,order=c(1,0,1),include.mean=FALSE)
+AIC(growth.ts11)
+growth.ts12<-arima(output,order=c(1,0,0),include.mean=FALSE)
+AIC(growth.ts12)
+growth.ts13<-arima(output,order=c(0,0,3),include.mean=FALSE)
+AIC(growth.ts13)
+growth.ts14<-arima(output,order=c(0,0,2),include.mean=FALSE)
+AIC(growth.ts14)
+growth.ts15<-arima(output,order=c(0,0,1),include.mean=FALSE)
+AIC(growth.ts15)
+```
+
+AIC는 낮을수록 좋은 모형을 의미한다. 따라서 growth.ts1의 AIC가 가장 낮으므로 ARMA(3,3)이 가장 최적의 모형이다. 
+
+## (b)
+
+```{r}
+growth.ts1
+```
+
+s.e. 표 ㅍ준오차를 나타내고 ar과 ma밑에 있는 숫자가 추정치를 의미한다.
+
+## (c)
+
+```{r}
+acf(output,main="ACF of output")
+pacf(output,main="PACF of output")
+```
+
+# 2번
+
+```{r}
+data2<-read.csv("C:\\temp\\unitroot_sample.csv",header=TRUE)
+head(data2)
+```
+
+```{r}
+plot(data2$w,type="l")
+plot(data2$x,type="l")
+plot(data2$y,type="l")
+plot(data2$z,type="l")
+```
+
+w는 time trenddhk drift가 있어보이고 x는 둘 다 존재하지 않는 것처럼 보인다. 그리고 y는 drift와 time trend가 있어보이지만 z는 drift만 있어보인다.
+
+## w unitroot test
+
+```{r}
+w.adf<-ur.df(data2$w,lags=12,type='trend',selectlags='BIC')
+summary(w.adf)
+```
+
+z.lag.1의 p-value를 보면 0.0315로 기각역에 있으므로 H0(unit root)을 기각해서 unit root가 아니다.
+
+## x unitroot test
+
+```{r}
+x.adf<-ur.df(data2$x,lags=12,type='none',selectlags='BIC')
+summary(x.adf)
+```
+
+lag는 한개를 선택했고 z.lag.1의 p-value를 보면 기각역에 속해서 H0(unit root)를 기각하여 unit root가 아니다.
+
+## y unitroot test
+
+```{r}
+y.adf<-ur.df(data2$y,lags=12,type='trend',selectlags='BIC')
+summary(y.adf)
+```
+
+z.lag.1을 보면 p-value가 기각역에 속해서 H0(unit root)을 기각시켜서 unit root가 아니다.
+
+## z unitroot test
+
+```{r}
+z.adf<-ur.df(data2$z,lags=12,type='drift',selectlags='BIC')
+summary(z.adf)
+```
+
+z.lag.1이 p-value값이 기각역에 속하여 H0(unit root)를 기각해서 unit root가 아니다.
+
+# 3번
+
+```{r}
+A<-matrix(c(1,3,5,7,2,1,3,5,3,3,3,6,4,2,4,6),nrow=4)
+b<-matrix(c(1,2,3,4),ncol=1)
+solve(A,b)
+```
+
+# 4번
+
+```{r}
+A<-matrix(c(1,5,2,7,3,6), nrow=2)
+B<-matrix(c(1,9,5,7,5,6), nrow=3)
+t(A%*%B)
+t(B)%*%t(A)
+```
+
+# 5번
+
+```{r}
+sum(diag(A%*%B))
+sum(diag(B%*%A))
+```
+
+# 6번
+
+```{r}
+A<-matrix(c(1,3,2,5,3,2,6,4,5),nrow=3)
+B<-matrix(c(1,0,1,3,4,0,4,3,8),nrow=3)
+solve(A%*%B)
+solve(B)%*%solve(A)
+```
+
+# 7번
+
+```{r}
+A<-matrix(c(1,3,2,5,3,2,6,4,5),nrow=3)
+solve(t(A))
+t(solve(A))
+```
+
+# 8번
+
+```{r}
+mean<-t(matrix(c(0.4,0.4,0.3),nrow=1))
+cov<-matrix(c(0.04,0.016,0.004,0.016,0.160,0,0.004,0,0.04),nrow=3)
+w<-t(matrix(c(0.4,0.4,0.3),nrow=1))
+t(w)%*%mean
+```
+
+평균이다.
+
+```{r}
+sqrt(t(w)%*%cov%*%w)
+```
+
+표준오차이다.

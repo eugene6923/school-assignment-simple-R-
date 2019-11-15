@@ -1,0 +1,68 @@
+---
+title: "금융계량 과제6"
+author: "1602108 정유진"
+date: "2018년 11월 29일"
+output: word_document
+---
+
+# 2번
+
+## (b)번
+
+```{r}
+1-2*pnorm(-3/sqrt(1.54))
+```
+
+```{r}
+1-2*pnorm(-3/sqrt(3))
+```
+
+# 6번
+
+```{r}
+library("urca")
+data<-read.csv("c:\\temp\\PS6_FinancialDataforGARCH.csv",header=TRUE)
+head(data)
+KOSPI2<-data$KOSPI[3:length(data$KOSPI)]
+```
+
+## (a)
+
+```{r}
+KOSPI2<-as.numeric(KOSPI2)
+KOSPI.adf<-ur.df(y=KOSPI2,lags=12,type='drift',selectlags='BIC')
+summary(KOSPI.adf)
+```
+
+nonstationary하다는 것을 결과에서 확인할 수 있다. 따라서 log difference를 취한다.
+
+```{r}
+KOSPI3<-100*diff(log(KOSPI2))
+```
+
+
+## (b)번 & (c)번
+
+```{r}
+library(fGarch)
+m1<-garchFit(data=KOSPI3,trace=F)
+summary(m1)
+```
+
+Ljung-Box test들(standardized residuals and squared standardized residuals)의 p-value를 보면 모두 너무 커서 serial correlation이 없다는 것을 알 수 있다. 따라서 모델은 적합하다. 그리고 GARCH(1,1)의 결과가 나오기 때문에 ARCH effect가 있다고 할 수 있다.
+
+## (d)번
+
+```{r}
+#install.packages("rugarch")
+library(rugarch)
+GJR.spec=ugarchspec(variance.model=list(moel="gjrGARCH",garchOrder=c(1,1)))
+GJRfit=ugarchfit(data=KOSPI3,spec=GJR.spec)
+GJRfit
+```
+
+no serial correlation을 확인할 수 있고 각각 test의 결과를 확인 할 수 있다.
+
+## (e)번
+
+Ljung Box test에서는 serial correlation이 없다는 것을 p-value를 통해 확는인할 수 있었다. 다른 test에서도 KOSPI변수는 GARCH(1,1)이 적합하다는 결과를 확인할 수 있다.

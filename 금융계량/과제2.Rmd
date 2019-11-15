@@ -1,0 +1,183 @@
+---
+title: "금융계량분석 과제2"
+author: "1602108 정유진"
+date: "2018년 10월 3일"
+output: word_document
+---
+
+```{r}
+library(tidyverse)
+library(fBasics)
+library(mFilter)
+```
+
+
+## 1번
+
+```{r}
+x<-seq(from=1,to=19,by=2)
+```
+
+### (a)번
+
+```{r}
+a=log(x)
+print(a)
+```
+
+### (b)번
+
+```{r}
+y<-subset(x,x>2)
+print(y)
+```
+
+## 2번
+
+### (a)번
+
+```{r}
+A<-matrix(c(2,1,2,0,2,3,0,0,4),nrow=3)
+solve(A)
+```
+
+### (b)번
+
+```{r}
+B<-matrix(c(1,0,0,0,10,0,0,0,4),nrow=3)
+solve(B)
+```
+
+### (c)번
+
+```{r}
+A%*%B
+```
+
+### (d)번
+
+```{r}
+rbind(A,B)
+```
+
+## 3번
+
+```{r}
+x<-rnorm(1000)
+b<-subset(x,x>1.96)
+c<-subset(x,x< -1.96)
+length(b)/length(x)
+length(c)/length(x)
+```
+
+## 4번
+
+### (a)번
+
+```{r}
+p_value=2*(1-pnorm(1.3))
+p_value
+```
+
+### (b)번
+
+```{r}
+qchisq(0.1,3)
+```
+
+## 5번
+
+```{r}
+a<-matrix(c(3,2,9,3,0,2,1,5,2),nrow=3)
+b<-matrix(c(0,1,4),nrow=3)
+d<-solve(a)
+c=d%*%b
+t(c)
+```
+
+## 6번
+
+### (a)번
+
+```{r}
+data<-read.csv("c:\\temp\\PS2_WonDollarData.csv",header=T)
+head(data)
+x<-log(data$FX)
+log_return<-100*diff(x)
+plot(log_return,type="l")
+title(main="Time plot of log returns of exchange return")
+plot(data$FX,type="l")
+title(main="Time plot of exchange return")
+```
+
+### (b)번
+
+```{r}
+mean(log_return)
+sqrt(var(log_return))
+```
+
+### (c)번
+
+```{r}
+s3<-skewness(log_return)
+T=length(rt)
+tst<-s3/sqrt(6/T)
+pvalue<-2*(1-pnorm(abs(tst)))
+pvalue
+```
+
+p_value값이 유의수준 0.05보다 크므로 H0(symmetric distribution)을 기각하지 않는다. 따라서 symmetric distribution이다.
+
+### (d)번
+
+```{r}
+k4<-kurtosis(log_return)
+tst<-k4/sqrt(24/T)
+pvalue<-2*(1-pnorm(abs(tst)))
+pvalue
+```
+
+p-value가 0.05를 넘지 않으므로 H0(normal tails)를 기각한다. 따라서 fat tails이다.
+
+### (e)번
+
+```{r}
+normalTest(log_return,method='jb')
+```
+
+p-value가 0.05를 넘지 않는 아주 작은 값이므로 H0(normality)를 기각한다. 따라서 log_return은 abnormality이다.
+
+## 7번
+
+```{r}
+data2<-read.csv("c:\\temp\\FinMET Taylor Rule Data Set.csv",header=T)
+head(data2)
+data3<-subset(data2,data2$MONTH>=201001)
+head(data3)
+```
+
+###(a)번
+
+```{r}
+attach(data3)
+logIP<-log(IP)
+IP.hp <- hpfilter(logIP,freq=144000)
+IPgap<-IP.hp$cycle
+IPgap
+```
+
+### (b)번
+
+```{r}
+Taylor1<-lm(CALL~INFL+IPgap)
+summary(Taylor1)
+```
+
+### (c)번
+
+```{r}
+Taylor2<-lm(CALL[-1]~CALL[-length(CALL)]+INFL[-1]+IPgap[-1])
+summary(Taylor2)
+```
+
