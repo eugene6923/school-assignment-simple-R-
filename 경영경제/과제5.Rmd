@@ -1,0 +1,81 @@
+---
+title: "경영경제 과제"
+author: "1602108 정유진"
+date: "2018년 12월 6일"
+output: html_document
+---
+
+
+
+```{r}
+#install.packages("forecast")
+mydata<-read.csv("c://Temp/RV_IV_data.csv",header=TRUE)
+head(mydata)
+
+#KOSPI.RV는 그 자체로 5분간격 로그리턴이다.
+mydata$KOSPI.RV=mydata$KOSPI.RV*100
+mydata$KOSPI.RV
+y.t = mydata$KOSPI.RV 
+x.t = mydata$VKOSPI
+
+yt = y.t[2:length(y.t)]
+yt1 = y.t[1:(length(y.t)-1)]
+xt = x.t[2:length(x.t)]
+
+lm1<- lm(yt~yt1+xt)
+summary(lm1)
+#xt의 p값이 0.0768으로 0.05보다 커기 때문에 granger causality있다고 보기 어렵다.
+
+y_t = y.t[5:length(y.t)]
+y_t_1 = y.t[4:(length(y.t)-1)]
+y_t_2 = y.t[3:(length(y.t)-2)]
+y_t_3 = y.t[2:(length(y.t)-3)]
+y_t_4 = y.t[1:(length(y.t)-4)]
+
+y.data = cbind(y_t_1 = y_t_1, y_t_2= y_t_2, y_t_3 = y_t_3, y_t_4 = y_t_4)
+
+Un_t_1 = x.t[4:(length(x.t)-1)]
+Un_t_2 = x.t[3:(length(x.t)-2)]
+Un_t_3 = x.t[2:(length(x.t)-3)]
+Un_t_4 = x.t[1:(length(x.t)-4)]
+
+x.data = cbind(Un_t_1 = Un_t_1, Un_t_2= Un_t_2, Un_t_3 = Un_t_3, Un_t_4 = Un_t_4)
+
+library(forecast)
+ar.fit1 = arima(y.t,order=c(1,0,0))
+ar.fit1
+
+#2번문제 - bic기준으로 p값 구하기
+AR.aic = c(); AR.bic = c()
+for( p in 1:10){
+  AR.fit = Arima(y.t, order = c(p,0,0))
+  AR.aic[p] = AR.fit$aic
+  AR.bic[p] = AIC(AR.fit,k = log(length(y.t)))
+}
+par(mfrow=c(1,2))
+plot(AR.aic, type = "b", pch =19, main = "AIC", ylab = "", xlab = "p")
+abline(v = which.min(AR.aic), col=2, lty = 2)
+plot(AR.bic, type = "b", pch =19, main = "BIC", ylab = "", xlab = "p")
+abline(v = which.min(AR.bic), col=2, lty = 2)
+#bic기준 AR(p)의 적정 p는 9이다.
+
+#ADL
+all.case = expand.grid(1:4,1:4)
+
+ADL.aic0 = matrix(0, ncol = 4, nrow = 4); ADL.bic0 = matrix(0, ncol = 4, nrow = 4)
+for( k in 1:nrow(all.case)){
+  p = all.case[k,1]; q = all.case[k,2]
+  ADL.fit = lm(y_t ~ y.data[,1:p] + x.data[,1:q])
+  ADL.aic0[p,q] = AIC(ADL.fit)
+  ADL.bic0[p,q] = AIC(ADL.fit,k = log(length(y.t)))
+}
+
+colnames(ADL.aic0) = c("q=1", "q=2", "q=3", "q=4")
+row.names(ADL.aic0) = c("q=1", "q=2", "q=3", "q=4")
+ADL.aic0
+
+colnames(ADL.bic0) = c("q=1", "q=2", "q=3", "q=4")
+row.names(ADL.bic0) = c("q=1", "q=2", "q=3", "q=4")
+ADL.bic0
+```
+

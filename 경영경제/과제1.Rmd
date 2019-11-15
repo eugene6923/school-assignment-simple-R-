@@ -1,0 +1,120 @@
+---
+title: "경영경제과제1"
+author: "정유진"
+date: "2018년 9월 26일"
+output: word_document
+---
+
+# 1번
+
+## 자료 살펴보며 성격 알기
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(tidyverse)
+data=read.csv("C:/Temp/caschool.csv",header=TRUE)
+attach(data)
+summary(data)
+head(data)
+```
+
+알아보려하는 read_scr은 연속형변수이며 EL,str,income도 마찬가지로 연속형변수임을 알 수 있다.
+
+## income의 분포 그래프로 알아보기
+
+```{r cars}
+par(mfrow=c(1,2))
+{hist(avginc, breaks=50, probability=TRUE)
+lines(density(avginc), col=2)}                          
+
+{hist(log(avginc), breaks=50, probability=TRUE)
+lines(density(log(avginc)), col=2)} 
+```
+
+# 3번 
+
+## 1번 식
+
+read_scr=STR
+
+```{r}
+lm.scr=lm(read_scr~str)
+summary(lm.scr)
+```
+
+## 2번식
+
+read_scr=str,EL
+
+```{r}
+lm.scr=lm(read_scr~str+el_pct)
+summary(lm.scr)
+```
+
+## 3번 식
+
+read_scr=str,el,log(income)
+
+```{r}
+lm.scr = lm(read_scr~log(avginc)+str+el_pct)
+summary(lm.scr)
+```
+
+## 4번 식
+
+read_scr=str,HiEL,HiEL*str
+
+```{r}
+#mean을 기준으로 더미 생성
+HiEL = ifelse(el_pct>10, 1, 0)
+
+lm.fit = lm(read_scr~str+HiEL+str*HiEL)
+summary(lm.fit)
+```
+
+## 5번 식
+
+read_scr=str,STR^2,STR^3,HiEL,log(income)
+
+```{r}
+str2=str^2
+str3=str^3
+lm.fit = lm(read_scr~str+str2+str3+HiEL+log(avginc))
+summary(lm.fit)
+```
+
+##6번식 
+
+read_scr=str,str^2,str^3,HiEL,HiEL*str,HiEL*str^2,HieL*str^3,log(income)
+
+```{r}
+lm.fit = lm(read_scr~str+str2+str3+HiEL*str+HiEL*str2+HiEL*str3+HiEL+log(avginc))
+summary(lm.fit)
+```
+
+## 7번 식
+
+read_scr=str,STR^2,str^3,EL,log(income)
+
+```{r}
+lm.fit = lm(read_scr~str+str2+str3+el_pct+log(avginc))
+summary(lm.fit)
+```
+
+# 효과 알아보기
+
+```{r}
+str_x=20
+y=76.27152*str_x+-3.94672*str_x^2+0.06681*str_x^3
+print(y)
+str_x2=18
+y2=76.27152*str_x2+-3.94672*str_x2^2+0.06681*str_x2^3
+print(y2)
+str_x3=22
+y3=76.27152*str_x3+-3.94672*str_x3^2+0.06681*str_x3^3
+print(y3)
+
+print(y2-y)
+print(y-y3)
+```
+

@@ -1,0 +1,72 @@
+---
+title: "경영경제 과제2"
+author: "1602108 정유진"
+date: "2018년 10월 20일"
+output: word_document
+---
+
+```{r}
+#install.packages("plm")
+library(plm)
+library(lmtest)
+#install.packages("car")
+library(car)
+#install.packages("vars")
+library(vars)
+```
+
+
+```{r}
+fatality<-read.csv("C:/Temp/3_fatality.csv",header=TRUE)
+head(fatality)
+```
+
+
+## dummy
+
+```{r}
+fatality <- transform(fatality, age18 = ifelse(mlda == 18,1,0),age19=ifelse(mlda ==19,1,0),age20=ifelse(mlda==20,1,0))
+```
+
+## 모형1(log(income)^2)
+
+```{r}
+inc2 <- (log(fatality$perinc))^2
+twoway=plm(mrall~beertax+age18+age19+age20+jaild+comserd+vmiles+unrate+inc2,data=fatality,effect="twoways",model="within",index=c("state","year"))
+summary(twoway)
+```
+
+beertax의 효과는 -4.6078e-05이다.
+
+### beertax의 95% 신뢰구간
+
+```{r}
+upper=-4.6078e-05+1.96*1.6997e-05
+lower=-4.6078e-05-1.96*1.6997e-05
+upper
+lower
+```
+
+[-1.276388e-05,-7.939212e-05]
+
+
+## 모형2(log(income)^3)
+
+```{r}
+inc3 <- (log(fatality$perinc))^3
+twoway2 = plm(mrall~beertax+age18+age19+age20+jaild+comserd+vmiles+unrate+inc3,data=fatality,effect="twoways",model="within",index=c("state","year"))
+summary(twoway2)
+```
+
+beertax는 -4.7198e-05이다.
+
+### beertax의 95% 신뢰구간
+
+```{r}
+upper2=-4.7198e-05+1.96*1.7025e-05
+lower2=-4.7198e-05-1.96*1.7025e-05
+upper2
+lower2
+```
+
+[-1.3829e-05,-8.0567e-05]

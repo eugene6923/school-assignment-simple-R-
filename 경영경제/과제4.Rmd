@@ -1,0 +1,110 @@
+---
+title: "과제4"
+author: "정유진"
+date: "2018년 11월 14일"
+output: word_document
+---
+
+## library
+
+```{r}
+#install.packages('AER')
+library(AER)
+library(lmtest)              # Heterosckedasticity Robust Standard Error package               
+```
+
+분석에 필요한 모듈을 불러온다.
+
+## data 불러오기
+
+```{r}
+ciga.data = read.csv("c:\\temp\\ciga.csv",header=TRUE)                          # 데이터 불러오기
+head(ciga.data)                                                       # 데이터 잘 불려왔나 확인
+attach(ciga.data)               
+```
+
+## 변수 생성
+
+```{r}
+rtaxso = taxs/cpi-tax/cpi                                             #sale tax
+rtax = tax/cpi                                                        #ciga tax
+perinc = income/pop/cpi                                               # real per capita state income
+
+
+log.q = log(packpc[year==1995])-log(packpc[year==1985])               #ln(Q_1995)-ln(Q_1985)
+log.p = log(avgprs[year==1995])-log(avgprs[year==1985])               #ln(P_1995)-ln(P_1985)
+log.inc = log(perinc[year==1995])-log(perinc[year==1985])             #ln(income_1995)-ln(income_1985)
+cigatax = rtax[year==1995]-rtax[year==1985]                           #CigTax_1995-CigTax_1985
+saletax = rtaxso[year==1995]-rtaxso[year==1985]                       #SalesTax_1995-SalesTax_1985
+```
+
+분석에 필요한 변수들을 생성해준다.
+
+## 1번 모형 생성
+
+```{r}
+ivreg.fit = ivreg(log.q~log.p+log.inc|saletax+log.inc)         # Y:담배수요, X:담배가격, W:Income, Z(도구변수): Sale tax 도구변수 회귀
+summary(ivreg.fit)            # 도구변수 회귀 요약
+coeftest(ivreg.fit, vcov = vcovHC)      # 도구변수 회귀 Heterosckedasticity Robust Standard Error
+```
+
+1번 식 분석에 필요한 모형을 생성해준다.
+
+## 2번 모형 생성
+
+```{r}
+ivreg.fit2 = ivreg(log.q~log.p+log.inc|cigatax+log.inc)         # Y:담배수요, X:담배가격, W:Income, Z(도구변수): cigarat tax 도구변수 회귀
+summary(ivreg.fit2)           
+coeftest(ivreg.fit2, vcov = vcovHC)     
+```
+
+2번 식 분석에 필요한 모형을 생성해준다.
+
+## 3번 모형 생성
+
+```{r}
+ivreg.fit3 = ivreg(log.q~log.p+log.inc|saletax+cigatax+log.inc)         # Y:담배수요, X:담배가격, W:Income, Z(도구변수): cigarat tax, sale tax 도구변수 회귀
+summary(ivreg.fit3)           
+coeftest(ivreg.fit3, vcov = vcovHC) 
+```
+
+3번 식 분석에 필요한 모형을 생성해준다.
+
+## 1번 모형 first stage 관련성 검정
+
+```{r}
+lm.x = lm(log.p~log.inc+saletax)                               # X:담배가격, W:Income, Z(도구변수): Sale tax 1st stage linear regression
+summary(lm.x)
+```
+
+first stage에서 도구변수관 고련성을 검정할 때 필요한 코드이다.
+
+## 2번 모형 first stage 관련성 검정
+
+```{r}
+lm.x2 = lm(log.p~log.inc+cigatax)                               # X:담배가격, W:Income, Z(도구변수): Sale tax 1st stage linear regression
+summary(lm.x2)
+```
+
+first stage에서 도구변수관 고련성을 검정할 때 필요한 코드이다.
+
+## 3번 모형 first stage 관련성 검정
+
+```{r}
+lm.x3 = lm(log.p~log.inc+saletax+cigatax)                               # X:담배가격, W:Income, Z(도구변수): Sale tax 1st stage linear regression
+summary(lm.x3)
+```
+
+first stage에서 도구변수관 고련성을 검정할 때 필요한 코드이다.
+
+## 3번 모형 외생성 검정
+
+```{r}
+log.q.hat = ivreg.fit3$fitted.value
+residual=log.q-log.q.hat
+test=lm(residual~saletax+log.inc+cigatax)
+summary(test)
+J=1.644*2
+J
+```
+
