@@ -1,0 +1,175 @@
+---
+title: "stat_modeling_homework6"
+author: "Yujin Jeong"
+date: "2019년 4월 21일"
+output: word_document
+---
+
+# 1 
+
+## (a)
+
+```{r}
+t<-c(1:11)
+y<-c(1,1,2,3,4,6,8,13,21,27,45)
+plot(y~t)
+```
+
+I can see the curve in the picture. The curve looks like a growth curve model because it is concave.
+
+## (b)
+
+y=B0*B1^t*e
+ln(y)=B0+tln(B1)+e
+B0 and ln(B1) are the parameters and they are just constant numbers.
+
+## (c)
+
+```{r}
+lny<-log(y)
+plot(lny~t)
+```
+
+Yes
+
+## (d)
+
+```{r}
+model<-lm(lny~t)
+summary(model)
+```
+
+## (e)
+
+```{r}
+lny12<--0.54334+t*0.38997
+lny12
+
+new.data.frame<-data.frame(t=12)
+predict(model,newdata=new.data.frame,interval="prediction",level=0.95)
+```
+
+## (f)
+
+```{r}
+y1<-y[1:length(y)-1]
+model1<-lm(y[2:length(y)]~y1+0)
+summary(model1)
+```
+
+The point estimate is 1.53197. It means that the number of diseases of that year is about 1.53 times bigger than the last year's number of diseases.
+
+```{r}
+confint(model1,'y1',level=0.95)
+```
+
+(1.401519, 1.662426)
+We are 95% confident that the number of diseases of that year is bigger than between 1.401519 and 1.662426 times than the last year's number of diseases.
+
+## (g)
+
+```{r}
+y12<-exp(4.13629)
+y12
+```
+
+
+# 2
+
+## (a)
+
+```{r}
+year<-c(1,1,1,1,2,2,2,2,3,3,3,3)
+quarter<-factor(c(1,2,3,4,1,2,3,4,1,2,3,4))
+sales<-c(2915,8032,10411,2427,4381,9138,11386,3382,5105,9894,12300,4013)
+period<-seq(1:12)
+time.sale<-ts(sales,frequency=4,start=1)
+sale.dat<-data.frame(sales,period,quarter)
+
+plot(time.sale)
+plot(decompose(time.sale))
+```
+
+## (b)
+
+We can oberserve that it has linear trend and seasonal effect.
+
+## (c)
+
+```{r}
+sale.mod<-lm(sales~period+relevel(quarter,4),data=sale.dat)
+summary(sale.mod)
+```
+
+## (d)
+
+### i
+
+```{r}
+summary(sale.mod)
+```
+
+Every independent variables in the model seem important. 
+
+### ii and iii
+
+```{r}
+new.data.frame1<-data.frame(period=c(13,14,15,16),quarter=factor(c(1,2,3,4)))
+predict(sale.mod,newdata=new.data.frame1,interval="prediction",level=0.95)
+```
+
+13247.417 is the point estimate. Prediction interval is (12677.550, 13817.283).
+
+# 3
+
+## (a)
+
+```{r}
+x3<-c(8,10,12,14,16,18,20)
+y3<-c(6.47,6.17,7.4,10.57,11.93,10.3,14.67)
+plot(y3~x3)
+```
+
+### i
+
+```{r}
+model.test1<-lm(log(y3)~x3)
+shapiro.test(resid(model.test1))
+library(lmtest)
+bptest(model.test1,studentize = F)
+```
+
+### ii
+
+```{r}
+model.test2<-lm(I(1/y3)~I(1/x3))
+shapiro.test(resid(model.test2))
+bptest(model.test2,studentize = F)
+```
+
+### iii 
+
+```{r}
+model.test3<-lm(y3~I(1/x3))
+shapiro.test(resid(model.test3))
+bptest(model.test3,studentize = F)
+```
+
+These three models satisfies the assumptions.
+
+## (b)
+
+I will use model1 and model3.
+
+```{r}
+new.data.frame2<-data.frame(x3=16)
+predict(model.test1,newdata=new.data.frame2,interval="prediction",level=0.95)
+exp(1.99038)
+exp(2.733324)
+```
+
+```{r}
+predict(model.test3,newdata=new.data.frame2,interval="prediction",level=0.95)
+```
+
+Model 1 is more precise because it has shorter interval. 

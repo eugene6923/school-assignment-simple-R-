@@ -1,0 +1,119 @@
+---
+title: "statistical modeling1"
+author: "Yujin Jeong E00628980"
+output: word_document
+---
+
+## 1 
+
+```{r}
+(18.8-20)/0.6
+18.8+2.064*3/5
+18.8-2.064*3/5
+```
+
+## 4
+
+### (a)
+
+```{r}
+x<-c(1,0,2,0,3,1,0,1,2,0)
+y<-c(16,9,17,12,22,13,8,15,19,11)
+plot(y~x)
+```
+
+### (b)
+
+```{r}
+lm(y~x)
+```
+
+y=4x+10.2
+
+### (c)
+
+```{r}
+plot(y~x)
+abline(lm(y~x),col="red")
+```
+
+### (d)
+
+yes
+
+### (e)
+
+```{r}
+xi<-1
+yi<-xi*4+10.2
+yi
+```
+
+### (f)
+
+```{r}
+a<-function(i){
+  result<-(4*x[i]+10.2)-y[i]
+  return(result)}
+a(1)+a(2)+a(3)+a(4)+a(5)+a(6)+a(7)+a(8)+a(9)+a(10)
+```
+
+It is close to 0.
+
+## 5
+
+### (a)
+
+```{r}
+b<-read.table("c:/temp/womenmuscle.txt",header=TRUE)
+plot(b$Muscle~b$Age)
+```
+
+### (b)
+
+```{r}
+lm(b$Muscle~b$Age)
+```
+
+Y=-1.174X+152.168
+
+### (c)
+
+```{r}
+plot(b$Muscle~b$Age)
+abline(lm(b$Muscle~b$Age),col="red")
+```
+
+### (d)
+
+yes
+
+### (e)
+
+The slople is negative so my plot supports the anticipation that muscle mass decreases with age.
+
+### (f)
+
+```{r}
+X<-60
+Y<- -1.174*X+152.168
+Y
+```
+
+### (g)
+
+```{r}
+X<-b$Age[8]
+Y - b$Muscle[8]
+```
+
+### (h)
+
+```{r}
+b0<-152.168
+b1<--1.174
+SSE<-sum((b$Muscle)^2)-(b0*sum(b$Muscle)+b1*sum(b$Age*b$Muscle))
+MSE<-SSE/(length(b$Age)-2)
+MSE
+```
+

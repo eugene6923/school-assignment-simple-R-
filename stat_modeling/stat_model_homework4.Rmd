@@ -1,0 +1,242 @@
+---
+title: "stat_modeling_homework4"
+author: "Yujin Jeong"
+output: word_document
+---
+
+# 1
+
+```{r}
+gas<-matrix(c(27.4,0,0,
+28.0,0,0,
+28.6,0,0,
+29.6,1,0,
+30.6,1,0,
+28.6,2,0,
+29.8,2,0,
+32,0,1,
+33,0,1,
+33.3,1,1,
+34.5,1,1,
+32.3,0,2,
+33.5,0,2,
+34.4,1,2,
+35,1,2,
+35.6,1,2,
+33.3,2,2,
+34,2,2,
+34.7,2,2,
+33.4,1,3,
+32,2,3,
+33,2,3
+),ncol=3,byrow=T)
+
+y<-gas[,1]
+x1<-gas[,2]
+x2<-gas[,3]
+
+```
+
+## (a)
+
+```{r}
+plot(y~x1,col=x2)
+```
+
+## (b)
+
+```{r}
+plot(y~x2,col=x1)
+```
+
+## (c)
+
+The plots say that there is an interaction between x1 and x2.
+
+## (d)
+
+```{r}
+x12=x1^2
+x22=x2^2
+
+model<-lm(y~x1+x12+x2+x22+x1*x2+x12*x22)
+summary(model)
+```
+
+F-statistic:  45.2 on 6 and 15 DF,  p-value: 9.135e-09
+
+p-value is less than 0.05 so it says that there is the significance of the overall model.     
+
+## (e)
+
+p-value of x1 is 0.000563, that of x1^2 is 0.001359, that of x2 is 9.28e-08, that of x2^2 is 5.06e-06. Therefore these variables seem to be important in the model.
+
+## (f)
+
+```{r}
+res<-resid(model)
+shapiro.test(res)
+```
+
+The p-value is over 0.05 therefore we don't reject the null hypothesis. It follows normality.
+
+```{r}
+std.resid<-res/0.6674
+abs(std.resid)
+```
+
+There is no outlier.
+
+```{r}
+library(lmtest)
+bptest(model,studentize=F)
+```
+
+Also, p-value of BP test is 0.9874 therefore we reject the null hypothesis that constant error variance equals zero.
+
+## (g)
+
+```{r}
+new.data.frame<-data.frame(x1=2,x2=3,x12=2^2,x22=3^2)
+predict(model,newdata=new.data.frame,interval="prediction",level=0.99)
+```
+
+We are 99% confident that an individual mileage will be obtained between 30.10061 and 34.88761 when using two units of addivie RST and three units of additive XST .
+
+## (h)
+
+```{r}
+SSEc<-sum((y-(3.52876*x1-1.50501*x12+5.42558*x2-1.44569*x22-0.15102*x1*x2+0.02769*x12*x22+28.10049))^2)
+MSEc<-SSEc/(length(y)-7)
+model_new<-lm(y~x1+x12+x2+x22)
+summary(model_new)
+SSEd<-sum((y-(28.1589+3.3133*x1-1.4111*x12+5.2752*x2-1.3964*x22))^2)
+MSdrop<-(SSEd-SSEc)/(length(y)-7-1-(5))
+F<-MSdrop/MSEc
+F
+```
+
+
+## (i)
+
+```{r}
+R2<-(SSEd-SSEc)/SSEd
+R2
+```
+
+It is close to 0. It means that the proportion of the unexplained variation in the reduced model that is explained by the extra independent variables in the complete model is small. 
+
+# 2
+
+## (a)
+
+```{r}
+my.datafile <- tempfile()
+cat(file=my.datafile, "
+566.52 472.92 15.57 4.45 2463 18
+696.82 1339.75 44.02 6.92 2048 9.5
+1033.15 620.25 20.42 4.28 3940 12.8
+1603.62 568.33 18.74 3.90 6505 36.7
+1611.37 1497.60 49.20 5.50 5723 35.7
+1613.27 1365.83 44.92 4.60 11520 24.0
+1854.17 1687.00 55.48 5.62 5779 43.3
+2160.55 1639.92 59.28 5.15 5969 46.7
+2305.58 2872.33 94.39 6.18 8461 78.7
+3503.93 3655.08 128.02 6.15 20106 180.5
+3571.89 2912.00 96.00 5.88 13313 60.9
+3741.40 3921.00 131.42 4.88 10771 103.7
+4026.52 3865.67 127.21 5.50 15543 126.8
+", sep=" ")
+
+data <- read.table(my.datafile, header=FALSE, col.names=c("y_new", "x3_new", "x1_new", "x5_new", "x2_new", "x4_new"))
+attach(data)
+```
+
+## (a)
+
+```{r}
+model2<-lm(y_new~x1_new+x2_new+x3_new+x4_new+x5_new)
+summary(model2)
+```
+
+There is a multicollinearity in this model. 
+
+## (b)
+
+```{r}
+summary(lm(x1_new~x2_new+x3_new+x4_new+x5_new))
+summary(lm(x2_new~x1_new+x3_new+x4_new+x5_new))
+summary(lm(x3_new~x1_new+x2_new+x4_new+x5_new))
+summary(lm(x4_new~x1_new+x2_new+x3_new+x5_new))
+summary(lm(x5_new~x1_new+x2_new+x3_new+x4_new))
+VIF1<-1/(1-0.9983)
+VIF2<-1/(1-0.7837)
+VIF3<-1/(1-0.9981)
+VIF4<-1/(1-0.903)
+VIF5<-1/(1-0.3116)
+VIF_sum<-sum(VIF1+VIF2+VIF3+VIF4+VIF5)
+VIF<-VIF_sum/5
+VIF
+```
+
+If we calculate the VIF then it is over 1. Also, while t statistics are not siginificant at all, F statistic is significant. 
+
+### (c)
+
+```{r}
+summary(lm(x2_new~x3_new+x5_new))
+summary(lm(x3_new~x2_new+x5_new))
+summary(lm(x5_new~x2_new+x3_new))
+VIF2_1<-1/(1-0.6711)
+VIF2_2<-1/(1-0.732)
+VIF2_3<-1/(1-0.2949)
+VIF_sum2<-sum(VIF2_1+VIF2_2+VIF2_3)
+VIF2<-VIF_sum2/3
+VIF2
+```
+
+The model in part (a) has more multicollinearity because it has a higher VIF.
+
+## (d)
+
+```{r}
+model4<-lm(y_new~x1_new+x5_new)
+summary(model4)
+```
+
+Adjusted R squared is 0.901 so it is a good model. 
+
+### multicollinearity
+
+```{r}
+summary(lm(x1_new~x5_new))
+summary(lm(x5_new~x1_new))
+VIF3<-1/(1-0.2211)
+VIF3
+```
+
+1.283862 is the largest VIFj but it is not lager than 10 so there is no multicollinearity.
+
+### outliers
+
+```{r}
+res2<-resid(model4)
+std.resid2<-res2/371.7
+abs(std.resid2)
+```
+
+There is no significant outlier in this model.
+
+### residuals
+
+```{r}
+shapiro.test(res2)
+```
+
+It follows normality.
+
+```{r}
+bptest(model4,studentize = F)
+```
+
+P-value of BP test is 0.7278 therefore we reject the null hypothesis that constant error variance equals zero.

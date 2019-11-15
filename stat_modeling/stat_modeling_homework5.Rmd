@@ -1,0 +1,239 @@
+---
+title: "stat_modeling_homework5"
+author: "Yujin Jeong"
+date: "2019년 4월 16일"
+output: word_document
+---
+
+# 1
+
+```{r}
+my.datafile <- tempfile()
+cat(file=my.datafile, "
+    22 4900 9 40 18 1
+    19 5800 10 50 20 1
+    24 5000 11 55 17 1
+    28 4400 12 30 19 0
+    18 3850 13 42 10 0
+    21 5300 15 20 22 1
+    29 4100 20 25 8 0
+    15 4700 22 60 15 1
+    12 5600 24 45 16 1
+    14 4900 27 82 14 1
+    18 3700 28 56 12 0
+    19 3800 31 38 8 0
+    15 2400 36 35 6 0
+    22 1800 37 28 4 0
+    13 3100 40 43 6 0
+    16 2300 41 20 5 0
+    8 4400 42 46 7 1
+    6 3300 42 15 4 0
+    7 2900 45 30 9 1
+    17 2400 46 16 3 0
+    ", sep=" ")
+
+sales <- read.table(my.datafile, header=FALSE, col.names=c("y","x1","x2","x3","x4","x5"))
+sales$x5<-factor(sales$x5)
+
+attach(sales)
+
+```
+
+## (a)
+
+```{r}
+lin<-lm(y~x1+x2+x3+x4+x5)
+par(mfrow=c(2,2))
+plot(lin)
+```
+
+I can see the curvature in the third picture. It might tell that there is a missing higher-order term of a vaiable or a missing interaction between terms in the model.
+
+
+```{r}
+library(leaps)
+leaps(x = cbind(x1, x2, x3, x4, x5, I(x1^2), I(x2^2),I(x3^2),I(x4^2),I(x1*x2),I(x1*x3),I(x1*x4),I(x2*x3),I(x2*x4),I(x3*x4)), y = y, nbest=2,  method="adjr2")
+```
+
+I used adjusted R^2 criterion to use an automatic variable selection procedure. 19th model has the adjusted R^2. Therefore x1, x2, x4,x1^2, x2^2,x4^2,x1*x2,x1*x3,x1*x4,x3*x4 will be the variables. 
+
+## (b)
+
+### normality
+
+```{r}
+lin<-lm(y~x1+x2+x4+I(x1^2)+I(x2^2)+I(x4^2)+I(x1*x2)+I(x1*x3)+I(x1*x4)+I(x3*x4) )
+shapiro.test(resid(lin))
+```
+
+do not reject the null. It follows the normality.
+
+### constant variance
+
+```{r}
+library(lmtest)
+bptest(lin,studentize=F)
+```
+
+do not reject the null. There is a weak evidence to conclude that It doesn't have a constant variance.
+
+## (c)
+
+### outlier
+
+```{r}
+rstandard(lin)
+```
+
+18th, 20th variables can be outliers.
+
+### influential points
+
+```{r}
+influence.measures(lin)
+```
+
+1st, 4th, 5th, 6th, 7th, 9th, 10th, 12th, 14th, 15th, 17th, 18th, 19th, 20th observations are influential points.
+
+### overal model 
+
+```{r}
+summary(lin)
+```
+
+The p-value of F test is 0.008196, so reject the null hypothesis. at least one of the parameters ar e not equal to zero.
+
+# 2
+
+```{r}
+my.datafile <- tempfile()
+cat(file=my.datafile, "
+25.9 4.91760 1.0 3.472 .9980 1 7 4 42 0 3 1
+29.5 5.02080 1.0 3.531 1.500 2 7 4 62 0 1 1
+27.9 4.54290 1.0 2.275 1.175 1 6 3 40 0 2 1 
+25.9 4.55730 1.0 4.050 1.232 1 6 3 54 0 4 1
+29.9 5.05970 1.0 4.455 1.121 1 6 3 42 0 3 1
+29.9 3.89100 1.0 4.455 0.988 1 6 3 56 0 2 1
+30.9 5.89800 1.0 5.850 1.240 1 7 4 51 1 2 1
+28.9 5.60390 1.0 9.520 1.501 0 6 3 32 0 1 1
+95.9 20.4202 3.0 13.00 4.420 3 10 6 42 1 2 1
+82.9 14.4598 2.5 12.80 3.000 2 9 5 14 1 4 1
+35.9 5.82820 1.0 6.435 1.225 2 6 3 32 0 1 1
+31.5 5.30030 1.0 4.9883 1.552 1 6 3 30 0 1 2
+31.0 6.27120 1.0 5.5200 0.975 1 5 3 30 0 1 2
+30.9 5.95920 1.0 6.6660 1.121 2 6 3 32 0 2 1
+30.0 5.05000 1.0 5.0000 1.020 0 5 3 46 1 4 1
+28.9 5.60390 1.0 9.5200 1.501 0 6 3 32 0 1 1
+36.9 8.24640 1.5 5.1500 1.664 2 8 4 50 0 4 1
+41.9 6.69690 1.5 6.9020 1.488 1.5 7 4 22 1 1 1
+40.5 7.78410 1.5 7.1020 1.376 1 6 3 17 0 4 1
+43.9 9.03840 1.0 7.8000 1.500 1.5 7 4 23 0 1 1
+37.5 5.98940 1.0 5.5200 1.256 2 6 3 40 1 2 1
+37.9 7.54220 1.5 4.0000 1.690 1 6 3 22 0 3 3
+44.5 8.79510 1.5 9.8900 1.820 2 8 5 50 1 1 1
+37.9 6.09310 1.5 6.7265 1.652 1 6 3 44 0 4 1
+38.9 8.36070 1.5 9.1500 1.777 2 8 5 48 1 1 1
+36.9 8.14000 1.0 8.0000 1.504 2 7 4 3 0 1 3
+45.8 9.14160 1.5 7.3562 1.831 1.5 8 5 31 0 4 1
+41.0 12.0000 1.5 5.0000 1.200 2 6 3 30 1 3 1
+", sep=" ")
+
+
+#	x1=taxes
+#     x2 = 'number of baths'
+#	x3 = 'lot size'
+#	x4 = 'living space'
+#	x5 = 'number of garages'
+#	x6 = 'number of rooms'
+#	x7 = 'number of bedrooms'
+#	x8 = 'age of home'
+#	x9 = 'number of fireplaces'
+#     x10= 'construction type (brick=1, brick and frame=2, aluminum and frame=3, frame=4)'
+#     x11= 'style (two-story=1, one-and-a-half-story=2, ranch=3)'
+#	y = 'sales price of home'
+
+home <- read.table(my.datafile, header=FALSE, col.names=c("y_2","x1_2","x2_2","x3_2","x4_2","x5_2","x6_2","x7_2","x8_2","x9_2", "x10_2","x11_2"))
+attach(home)
+```
+
+## (a)
+
+Define z1, z2, z3 as follows : zi = 1 when construction type is one of (1, 2, 3, 4)  or 0 otherwise. 
+Define a1, a2 as follows : ai=1 when style is one of (1, 2, 3) or 0 otherwise.
+
+## (b)
+
+```{r}
+step(lm(y_2 ~ 1), data=data, scope = ~ x1_2+x2_2+x3_2+x4_2+x5_2+x6_2+x7_2+x8_2+x9_2+factor(x10_2)+factor(x11_2))
+```
+
+According to the stepwise regression, lm(formula = y_2 ~ x2_2 + x4_2 + x8_2 + factor(x11_2) + x5_2 + 
+    x9_2) is the best model. y=11.8503+10.5870*x2+11.6146*x4-0.2398*x8-1.1875*a2-7.0131*a3+2.5185*x5+2.9476*x9
+    
+    
+```{r}
+lin2<-lm( y_2 ~ x2_2 + x4_2 + x8_2 + factor(x11_2) + x5_2 + x9_2)
+summary(lin2)
+```
+
+## (c)
+
+We should see all the interactions between the dummy variables (z1*a1, z1*a2, z2*a1, z2*a2, z3*a1, z3*a2).
+
+```{r}
+lin.test<-lm(y_2~x1_2+x2_2+x3_2+x4_2+x5_2+x6_2+x7_2+x8_2+x9_2+(factor(x10_2):factor(x11_2)))
+summary(lin.test)
+```
+
+There is no significant parameter in the interaction term. Therefore I think there is no interaction.
+
+## (d)
+
+```{r}
+library(lsmeans)
+library(emmeans)
+
+lin.mod<-lm(y_2~x2_2+x4_2+x5_2+x6_2+x7_2+x8_2+factor(x11_2))
+
+leastsquare = emmeans(lin.mod, "x11_2")
+
+
+Contrasts = list(S2vsS1          = c(-1, 1, 0),  
+                 S3vsS1          = c(-1, 0, 1),   
+                 AvS2andS3vsS1   = c(-1, 1/2, 1/2))
+
+   ### The column names match the order of levels of the treatment variable
+   ### The coefficients of each row sum to 0
+
+
+contrast(leastsquare, Contrasts)
+confint(contrast(leastsquare, Contrasts))
+```
+
+ First one's p-value is 0.2766 therefore it is not significant. However p-values of second one and third one is less than 0.05 therefore they are significant. 
+
+We are 95% that the mean difference between S2 and S1 is between -10.1 and 3.07.
+We are 95% that the mean difference between S3 and S1 is between -15.2 and -1.53.
+We are 95% that the mean difference between the average of S2 and S3 and S1 is between -11.3 and -0.65.
+
+### Bonferroni
+
+```{r}
+#CI
+confint(contrast(leastsquare, Contrasts, adjust="bonferroni"))
+```
+
+We are 95% that the mean difference between S2 and S1 is between -11.8 and 4.748.
+We are 95% that the mean difference between S3 and S1 is between -17.0 and 0.213.
+We are 95% that the mean difference between the average of S2 and S3 and S1 is between -12.6 and 0.700.
+
+### Scheffe
+
+```{r}
+#CI
+confint(contrast(leastsquare, Contrasts, adjust="scheffe"))
+```
+
+We are 95% that the mean difference between S2 and S1 is between -11.9 and 4.840.
+We are 95% that the mean difference between S3 and S1 is between -17.1 and 0.308.
+We are 95% that the mean difference between the average of S2 and S3 and S1 is between -12.7 and 0.773.
